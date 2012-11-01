@@ -1,0 +1,16 @@
+
+commands:
+  yeti:
+    location: "<yeti source path>"
+    desc: "test cloudfoundry functionalities"
+    mandatory:
+      usage: "rake"
+      result: "<result file path>"
+  bizops:
+    location: "<bizops source path>"
+    desc: "test bizops functionalities"
+    mandatory:
+      usage: "rake"
+      result: "<result file path>"
+
+

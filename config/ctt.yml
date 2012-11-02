@@ -1,0 +1,7 @@
+
+commands:
+  full: "rake full"
+  default: "rake bvt"
+  bvt: "rake bvt"
+
+results: USER_INPUT

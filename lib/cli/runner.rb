@@ -21,7 +21,7 @@ module CTT::Cli
     end
 
     def run
-      puts "the args: #{@args}"
+      #puts "the args: #{@args}"
       parse_global_options
 
       if @args.empty? && @options.empty?
@@ -83,6 +83,7 @@ module CTT::Cli
         find = cmds.index(longest_cmd)
         if find
           args = @args[(size - index)..-1]
+          break
         end
 
       end
@@ -95,14 +96,33 @@ module CTT::Cli
     end
 
     def get_command_handler(command, args)
+
+      handler = nil
+
+      # handle runtime commands
+      #
+      @configs.configs["suites"].keys.each do |s|
+        if command =~ /#{s}/
+          pieces = command.split(" ")
+          pieces.insert(0, "") if pieces.size == 1
+          action, suite = pieces
+          return Command::TestSuite.new(action, suite, args, self)
+        end
+      end
+
+      # handle user defined alias
+      #
+      # TODO
+
+      # handle static commands
+      #
       handler =
           case command
             when "help"
-              Help.new(args, self)
+              Command::Help.new(args, self)
             else
               nil
           end
-
     end
   end
 end

@@ -5,6 +5,10 @@ module CTTExtensions
     msg = message
     puts msg
   end
+
+  def err(message)
+    raise CTT::Cli::CliError, message
+  end
 end
 
 class Object

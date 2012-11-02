@@ -1,7 +1,12 @@
 
 module CTT::Cli
-  module Commands
-    commands = {"help" =>
+  class Commands
+
+    class << self
+      attr_reader :commands
+    end
+
+    @commands = {"help" =>
                   {"usage"  => "help",
                    "desc"   => "list all avaiable commands"},
                 "aliases" =>

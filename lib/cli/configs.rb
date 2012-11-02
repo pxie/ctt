@@ -14,7 +14,7 @@ module CTT::Cli
 
     def load
       @configs = YAML.load_file(COMMANDS_CONFIG_PATH)
-      @commands = @configs["commands"].keys
+      @commands = @configs["commands"]
     end
 
     def save

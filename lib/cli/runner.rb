@@ -3,6 +3,7 @@ module CTT::Cli
 
   class Runner
 
+    attr_reader :commands
 
     # @param [Array] args
     def self.run(args)
@@ -15,13 +16,8 @@ module CTT::Cli
       banner = "Usage: ctt [<options>] <command> [<args>]"
       @option_parser = OptionParser.new(banner)
 
-      @commands = Configs.new.commands
-      #@commands = Commands.commands.merge(Configs.new.commands)
-      #@configs = Configs.new
-      #puts @configs.configs
-
-
-
+      @configs = Configs.new
+      @commands = @configs.commands
     end
 
     def run
@@ -33,10 +29,18 @@ module CTT::Cli
         exit(0)
       end
 
-      find, command = search_commands
-      err("invalid command. abort!") unless find
+      if @options[:help]
+        Command::Help.new(@args, self).run
+        exit(0)
+      end
 
-      execute(command)
+      find, command, args = search_commands
+      unless find
+        say("invalid command. abort!", :red)
+        exit(1)
+      end
+
+      execute(command, args)
 
     end
 
@@ -52,10 +56,14 @@ module CTT::Cli
 
       opts.on("-h", "--help", "Show help message") do
         @options[:help] = true
-        @args << "help"
       end
 
-      @args = @option_parser.order!(@args)
+      begin
+        @args = @option_parser.order!(@args)
+      rescue
+        say("invalid command. abort!", :red)
+        exit(1)
+      end
     end
 
     def usage
@@ -81,8 +89,20 @@ module CTT::Cli
       [find, longest_cmd, args]
     end
 
-    def execute(command)
-      eval("#{command}(args)")
+    def execute(command, args)
+      handler = get_command_handler(command, args)
+      handler.run
+    end
+
+    def get_command_handler(command, args)
+      handler =
+          case command
+            when "help"
+              Help.new(args, self)
+            else
+              nil
+          end
+
     end
   end
 end

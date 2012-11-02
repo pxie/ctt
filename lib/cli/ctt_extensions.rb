@@ -1,9 +1,9 @@
 
 module CTTExtensions
 
-  def say(message, sep = "\n")
+  def say(message, color = nil, sep = "\n")
     msg = message
-    puts msg
+    puts Paint[msg, color]
   end
 
   def err(message)
@@ -12,9 +12,5 @@ module CTTExtensions
 end
 
 class Object
-  include CTTExtensions
-end
-
-class String
   include CTTExtensions
 end

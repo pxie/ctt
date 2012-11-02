@@ -2,7 +2,7 @@
 
 require "optparse"
 require "yaml"
-require "singleton"
+require "paint"
 
 
 
@@ -11,4 +11,5 @@ require "cli/ctt_extensions"
 require "cli/configs"
 require "cli/errors"
 require "cli/runner"
-require "cli/commands/commands"
+require "cli/base"
+require "cli/commands/help"

@@ -22,10 +22,19 @@ module CTT::Cli::Command
     def list
       puts "list #{@suite}"
       check_configuration
+
       suite_configs_path = File.join(@configs.configs["suites"][@suite]["location"], TEST_SUITE_CONFIG_FILE)
       suite_configs = YAML.load_file(suite_configs_path)
+      unless suite_configs.is_a?(Hash)
+        say("invalid yaml format for file: #{suite_configs_path}", :red)
+        exit(1)
+      end
 
-
+      say("all subcommands for test suite: #{@suite}", :yellow)
+      suite_configs["commands"].each do |command, details|
+        say("#{@suite} #{command}", :green)
+        say("\t#{details["desc"]}\n")
+      end
     end
 
     def configure
@@ -34,7 +43,7 @@ module CTT::Cli::Command
       location = "" if location == USER_INPUT
       invalid_input = true
       3.times do
-        user_input = ask("suite: #{@suite} source directory:", :default => location).strip
+        user_input = ask("suite: #{@suite} source directory:", :default => location)
         if user_input =~ /^~/
           user_input = File.expand_path(user_input)
         else

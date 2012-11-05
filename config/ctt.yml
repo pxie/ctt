@@ -1,7 +1,13 @@
-
+---
 commands:
-  full: "rake full"
-  default: "rake bvt"
-  bvt: "rake bvt"
+  full:
+    exec: "rake full"
+    desc: "execute all tests"
+  default:
+    exec: "rake full"
+    desc: "execute all tests. If no subcommand is specific, default command will be executed"
+  bvt:
+    exec: "rake tests"
+    desc: "execute all core tests. It will be finished in shorter time frame"
 
-results: USER_INPUT
+results: ./reports

@@ -18,8 +18,8 @@ Gem::Specification.new do |s|
   s.executables  = %w(ctt)
 
   s.add_dependency "json_pure", "~>1.6.1"
-  s.add_dependency "highline", "~>1.6.2"
   s.add_dependency "progressbar", "~>0.9.0"
   s.add_dependency "terminal-table", "~>1.4.2"
   s.add_dependency "paint", "~>0.8.5"
+  s.add_dependency "interact", "~>0.4.8"
 end

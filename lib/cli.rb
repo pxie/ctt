@@ -3,6 +3,7 @@
 require "optparse"
 require "yaml"
 require "paint"
+require "interact"
 
 
 

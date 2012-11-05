@@ -3,7 +3,8 @@ module CTT::Cli
 
   class Runner
 
-    attr_reader :commands
+    attr_reader    :commands
+    attr_accessor  :configs
 
     # @param [Array] args
     def self.run(args)

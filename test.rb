@@ -1,46 +1,49 @@
 
-#puts ARGV
-## find the longest command
-
-#li = ["help", "add alias", "delete alias", "yeti", "aliases", "add alias"]
-#
-#puts li[0..1].join(", ")
-#puts li[1 + 1..-1].join(", ")
-#
-#puts "xxxxxxx333"
-#
-#inputs = ["help -v", "add yeti", "yeti rake full[1] VCAP=true", "aliases", "add alias sef sdf e ste"]
-#
-#inputs.each do |i|
-#
-#  pieces = i.split(" ")
-#  size = pieces.size
-#  find = nil
-#  longest_cmd = ""
-#  size.times do |index|
-#
-#    longest_cmd = pieces[0..(size - index - 1)].join(" ")
-#    find = li.index(longest_cmd)
-#    break if find
-#  end
-#
-#  puts "input is #{i}"
-#  if find
-#    puts longest_cmd
-#  else
-#    puts "invalid command"
-#  end
-#  puts "================="
-#end
-
-class Help
-
-  def initialize(args)
-    @args = args.dup
-  end
-
-  def run
-    puts "#{self}, #{@args}"
+def use_io(cmd)
+  IO.popen(cmd, :err =>[:child, :out]) do |io|
+    output << io.read
+    puts output
   end
 end
+
+def use_system(cmd)
+  system(cmd)
+  puts $stdout
+end
+
+def use_exec(cmd)
+  exec(cmd) if fork == nil
+  Process.wait
+end
+
+
+threads = []
+cmd = "ruby sleep.rb"
+
+output = ""
+threads << Thread.new do
+  #use_exec(cmd)
+  #use_system(cmd)
+  require 'pty'
+  begin
+    PTY.spawn(cmd) do |stdin, stdout, pid|
+      begin
+        stdin.each { |line| print line }
+      rescue Errno::EIO
+      end
+      puts "==========\n#{stdout.read}\n===========\n#{pid}\n============"
+    end
+  rescue PTY::ChildExited
+    puts "The child process exited!"
+  end
+end
+
+threads.each { |t| t.join }
+
+
+
+#use_system(cmd)
+
+puts "parent finish"
+
 

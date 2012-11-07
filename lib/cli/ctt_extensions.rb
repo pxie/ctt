@@ -6,6 +6,10 @@ module CTTExtensions
     puts Paint[msg, color]
   end
 
+  def nl
+    puts ""
+  end
+
   def err(message)
     raise CTT::Cli::CliError, message
   end

@@ -3,6 +3,7 @@ module CTT::Cli::Command
 
   USER_INPUT               = "USER_INPUT"
   TEST_SUITE_CONFIG_FILE   = "ctt.yml"
+  SUPPORT_OPTIONS          = {"--force" => "bypass git dirty state check"}
 
   class TestSuite < Base
     include Interactive
@@ -19,19 +20,19 @@ module CTT::Cli::Command
       eval(@action)
     end
 
-    def list
-      puts "list #{@suite}"
-      check_configuration
 
-      suite_configs_path = File.join(@configs.configs["suites"][@suite]["location"], TEST_SUITE_CONFIG_FILE)
-      suite_configs = YAML.load_file(suite_configs_path)
-      unless suite_configs.is_a?(Hash)
-        say("invalid yaml format for file: #{suite_configs_path}", :red)
-        exit(1)
-      end
+    def list
+      check_configuration
+      get_suite_configs
 
       say("all subcommands for test suite: #{@suite}", :yellow)
-      suite_configs["commands"].each do |command, details|
+      say("Options:", :yellow)
+      SUPPORT_OPTIONS.each do |opt, helper|
+        say("\t[#{opt}]   \t#{helper}")
+      end
+      nl
+
+      @suite_configs["commands"].each do |command, details|
         say("#{@suite} #{command}", :green)
         say("\t#{details["desc"]}\n")
       end
@@ -73,7 +74,20 @@ module CTT::Cli::Command
     end
 
     def test
-      puts "test #{@suite}"
+      check_configuration
+      parse_options
+      check_if_dirty_state unless @options["--force"]
+      get_suite_configs
+      command = parse_command
+
+      threads = []
+      threads << Thread.new do
+        Dir.chpwd(@configs.configs["suites"][@suite]["location"])
+        say("run command: #{yellow(command)}")
+        system(command)
+      end
+
+      threads.each { |t| t.join }
     end
 
     def check_configuration
@@ -88,6 +102,65 @@ module CTT::Cli::Command
         say("configure file: #{TEST_SUITE_CONFIG_FILE} for test suite: #{@suite} does not exist.", :red)
         exit(1)
       end
+    end
+
+    def check_if_dirty_state
+      if dirty_state?
+        say("\n%s\n" % [`git status`])
+        say("Your current directory has some local modifications, " +
+                "please discard or commit them first.\n" +
+                "Or use #{yellow("--force")} to bypass git dirty check.")
+        exit(1)
+      end
+    end
+
+    def dirty_state?
+      `which git`
+      return false unless $? == 0
+
+      Dir.chdir(@configs.configs["suites"][@suite]["location"])
+      (File.directory?(".git") || File.directory?(File.join("..", ".git"))) \
+        && `git status --porcelain | wc -l`.to_i > 0
+    end
+
+    def parse_options
+      @options = {}
+      opts = SUPPORT_OPTIONS.keys
+      @args.each do |arg|
+        if opts.index(arg)
+          @options[arg] = true
+          @args.delete(arg)
+        end
+      end
+    end
+
+    def parse_command
+      subcmd = ""
+      if @args.empty?
+        subcmd =  @suite_configs["commands"]["default"]["exec"]
+      elsif @suite_configs["commands"].has_key?(@args[0])
+        subcmd = @suite_configs["commands"][@args[0]]["exec"]
+        @args.delete(@args[0])
+      else
+        say("#{@args[0]} is not invalid sub-command, run as default command")
+        subcmd = @suite_configs["commands"]["default"]["exec"]
+      end
+
+      unless @args.empty?
+        subcmd = subcmd + " " + @args.join(" ")
+      end
+
+      subcmd
+    end
+
+    def get_suite_configs
+      suite_configs_path = File.join(@configs.configs["suites"][@suite]["location"], TEST_SUITE_CONFIG_FILE)
+      @suite_configs ||= YAML.load_file(suite_configs_path)
+      unless @suite_configs.is_a?(Hash)
+        say("invalid yaml format for file: #{suite_configs_path}", :red)
+        exit(1)
+      end
+      @suite_configs
     end
   end
 end

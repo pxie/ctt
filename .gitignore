@@ -20,3 +20,5 @@ vendor
 
 # project custom
 config/commands.yml
+sleep.rb
+test*.rb

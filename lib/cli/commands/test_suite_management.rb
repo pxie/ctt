@@ -86,7 +86,7 @@ module CTT::Cli::Command
         Dir.chdir(@configs.configs["suites"][@suite]["location"])
         # dependency should be successful before run testing command
         dependencies.each do |d|
-          system(d)
+          `#{d}`
           exit(1) unless $? == 0
         end
 

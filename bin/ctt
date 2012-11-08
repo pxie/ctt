@@ -1,12 +1,12 @@
 #!/usr/bin/env ruby
 
-gemfile = File.expand_path("../../Gemfile", __FILE__)
-
-if File.exists?(gemfile)
-  ENV["BUNDLE_GEMFILE"] = gemfile
-  require "rubygems"
-  require "bundler/setup"
-end
+#gemfile = File.expand_path("../../Gemfile", __FILE__)
+#
+#if File.exists?(gemfile)
+#  ENV["BUNDLE_GEMFILE"] = gemfile
+#  require "rubygems"
+#  require "bundler/setup"
+#end
 
 $:.unshift(File.expand_path("../../lib", __FILE__))
 require "cli"

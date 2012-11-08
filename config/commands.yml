@@ -1,7 +1,7 @@
 ---
 suites:
   yeti:
-    location: /Users/pinx/src/cf-release/src/tests
+    location: /Users/pinx/src/ctt2/config
     mandatory: false
   bizops:
     location: USER_INPUT

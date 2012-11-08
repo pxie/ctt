@@ -45,5 +45,6 @@ threads.each { |t| t.join }
 #use_system(cmd)
 
 puts "parent finish"
+File.expand_path
 
 

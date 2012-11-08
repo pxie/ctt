@@ -78,12 +78,19 @@ module CTT::Cli::Command
       parse_options
       check_if_dirty_state unless @options["--force"]
       get_suite_configs
-      command = parse_command
+
+      dependencies, command = parse_command
 
       threads = []
       threads << Thread.new do
-        Dir.chpwd(@configs.configs["suites"][@suite]["location"])
-        say("run command: #{yellow(command)}")
+        Dir.chdir(@configs.configs["suites"][@suite]["location"])
+        # dependency should be successful before run testing command
+        dependencies.each do |d|
+          system(d)
+          exit(1) unless $? == 0
+        end
+
+        say("\nrun command: #{yellow(command)}")
         system(command)
       end
 
@@ -136,21 +143,25 @@ module CTT::Cli::Command
 
     def parse_command
       subcmd = ""
+      dependencies = []
       if @args.empty?
         subcmd =  @suite_configs["commands"]["default"]["exec"]
+        dependencies = @suite_configs["commands"]["default"]["dependencies"]
       elsif @suite_configs["commands"].has_key?(@args[0])
         subcmd = @suite_configs["commands"][@args[0]]["exec"]
+        dependencies = @suite_configs["commands"][@args[0]]["dependencies"]
         @args.delete(@args[0])
       else
         say("#{@args[0]} is not invalid sub-command, run as default command")
         subcmd = @suite_configs["commands"]["default"]["exec"]
+        dependencies = @suite_configs["commands"]["default"]["dependencies"]
       end
 
       unless @args.empty?
         subcmd = subcmd + " " + @args.join(" ")
       end
 
-      subcmd
+      [dependencies, subcmd]
     end
 
     def get_suite_configs
